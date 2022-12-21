@@ -1,0 +1,35 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  
+stages:          # List of stages for jobs, and their order of execution
+  - cleanup
+  - build
+  - deploy
+cleanup-job:
+  stage: cleanup
+  tags:
+    - shell_runner
+  script:
+    - echo "Cleanup application..."
+    - ssh -o StrictHostKeyChecking=no -i ${PRIVATE_KEY_FILE} ${DEPLOYMENT_USER}@${DEPLOYMENT_HOST} "cd /containers/project && docker compose rm -fs bot"
+    - echo "Remove image..."
+    - ssh -o StrictHostKeyChecking=no -i ${PRIVATE_KEY_FILE} ${DEPLOYMENT_USER}@${DEPLOYMENT_HOST} "docker rmi -f tpbot:latest"
+    - echo "Cleanup complete."
+build-job:       # This job runs in the build stage, which runs first.
+  stage: build
+  tags:
+      - docker_runner
+  script:
+    - echo "Compiling the code..."
+    - docker build -t tpbot .
+    - echo "Compile complete."
+
+deploy-job:      
+  stage: deploy
+  tags:
+    - shell_runner
+  script:
+    - echo "Starting application..."
+    - ssh -o StrictHostKeyChecking=no -i ${PRIVATE_KEY_FILE} ${DEPLOYMENT_USER}@${DEPLOYMENT_HOST} "cd /containers/project && docker compose up -d bot"
+    - echo "Application successfully started."

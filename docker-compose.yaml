@@ -1,0 +1,27 @@
+﻿version: "3.9"
+
+services:
+  redis_db:
+    image: redis
+    restart: always  
+    
+  tpemulator:
+    image: telegrambot-tpemulator
+    ports:
+      - 8080:5000
+    
+  bot:
+    build: .
+    environment:
+      - TZ=Asia/Yekaterinburg 
+      - botf=5724798418:AAHWPqm623Zl-MHDxXUHMeLi5kYFC_3eh7k
+      - CUSTOMCONNSTR_Redis=redis_db:6379
+      - CUSTOMCONNSTR_TeamprojectApi=http://tpemulator:5000
+    ports:
+      - 5001:5001
+    depends_on:
+      - redis_db
+      - tpemulator
+    links:
+      - redis_db
+      - tpemulator
