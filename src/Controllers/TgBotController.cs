@@ -35,7 +35,7 @@ public class TgBotController : BotController
         if (Flag) 
             RunInBackground(TimeSpan.FromSeconds(25), () => Console.WriteLine("Sending"));
     }
-    //Максим, дальше бога нет, это временное решение...
+    
     async Task RunInBackground(TimeSpan timeSpan, Action action)
     {
         var periodicTimer = new PeriodicTimer(timeSpan);
